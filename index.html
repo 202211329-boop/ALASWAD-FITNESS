@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALASWAD FITNESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="toast-box"></div>
+    
+    <div id="info-modal" class="modal-overlay hidden" onclick="closeInfo()">
+        <div class="modal-box" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="info-title">عنوان</h3>
+                <i class="fas fa-times" onclick="closeInfo()"></i>
+            </div>
+            <p id="info-desc">الوصف هنا...</p>
+        </div>
+    </div>
+
+    <div id="weight-modal" class="modal-overlay hidden">
+        <div class="modal-box" style="text-align:center;">
+            <div class="modal-header" style="justify-content:center; border:none;">
+                <h3 style="font-size:1.5rem;">⚖️ الميزان الأسبوعي</h3>
+            </div>
+            <p style="color:#ccc; margin-bottom:15px;">حان وقت الحقيقة! الأرقام لا تكذب.</p>
+            <div class="input-box">
+                <label>وزنك الحالي اليوم (كغ)</label>
+                <input type="number" id="weekly-weight-input" placeholder="مثلاً 75.5" step="0.1">
+            </div>
+            <div id="weight-analysis-result" style="margin:15px 0; color:var(--primary); font-weight:bold;"></div>
+            <button onclick="submitWeeklyWeight()" class="btn-main">تحليل وتحديث الوزن</button>
+        </div>
+    </div>
+
+    <div class="main-wrapper">
+        
+        <section id="screen-setup" class="screen active">
+            <div class="center-content">
+                <div class="setup-container">
+                    <div class="brand-header">
+                        <i class="fas fa-dumbbell brand-logo"></i>
+                        <h1 class="brand-name">ALASWAD FITNESS</h1>
+                        <p class="brand-slogan">العلم والمنطق لبناء جسمك</p>
+                    </div>
+                    <form id="form-setup">
+                        <div class="input-box"><label>الاسم</label><input type="text" id="set-name" required></div>
+                        <div class="grid-2">
+                            <div class="input-box"><label>الجنس</label><select id="set-gender"><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+                            <div class="input-box"><label>العمر</label><input type="number" id="set-age" min="10" required></div>
+                        </div>
+                        <div class="grid-2">
+                            <div class="input-box"><label>الطول (سم)</label><input type="number" id="set-height" min="50" required></div>
+                            <div class="input-box"><label>الوزن (كغ)</label><input type="number" id="set-weight" min="30" required></div>
+                        </div>
+                        <div class="input-box">
+                            <label>الهدف <i class="fas fa-info-circle info-icon" onclick="showInfo('goal')"></i></label>
+                            <select id="set-goal">
+                                <option value="-500">تنشيف (خسارة دهون)</option>
+                                <option value="0">محافظة (ثبات الوزن)</option>
+                                <option value="300">تضخيم (زيادة عضل)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-accent">ابدأ الرحلة</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="screen-dashboard" class="screen">
+            <nav class="top-nav">
+                <div class="nav-brand">ALASWAD <span style="color:var(--primary)">FITNESS</span></div>
+                <div class="nav-user">
+                    <div id="user-rank" class="rank-badge">مبتدئ</div>
+                    <div class="streak-pill"><i class="fas fa-fire"></i> <span id="streak-days">0</span></div>
+                    <i class="fas fa-sign-out-alt logout-icon" onclick="resetAppData()"></i>
+                </div>
+            </nav>
+
+            <div id="insulin-warning" class="alert-banner hidden">
+                <i class="fas fa-exclamation-circle"></i> تنبيه: الأكل الآن قد يرفع الأنسولين ويوقف الحرق الليلي!
+            </div>
+            
+            <div id="sleep-debt-warning" class="alert-banner hidden" style="border-color: #f59e0b; background: rgba(245, 158, 11, 0.15); color: #fbbf24;">
+                <i class="fas fa-battery-quarter"></i> تراكم ديون النوم! الجهاز العصبي مرهق، قلل شدة التمرين.
+            </div>
+
+            <div class="battery-container" onclick="showInfo('bodyBattery')">
+                <div class="battery-header">
+                    <span><i class="fas fa-charging-station"></i> بطارية الجسم (Recovery)</span>
+                    <span id="battery-percent">100%</span>
+                </div>
+                <div class="battery-bar-bg">
+                    <div id="battery-bar-fill" class="battery-bar-fill"></div>
+                </div>
+                <small id="battery-advice" style="color:#aaa; font-size:0.75rem; margin-top:5px; display:block;">جاهز للتمرين!</small>
+            </div>
+
+            <div class="dashboard-grid">
+                
+                <div class="dash-col-main">
+                    <div class="hero-card">
+                        <div class="circle-container">
+                            <svg class="progress-ring" width="180" height="180">
+                                <circle class="bg-ring" cx="90" cy="90" r="80"></circle>
+                                <circle id="cals-circle" class="fg-ring" cx="90" cy="90" r="80"></circle>
+                            </svg>
+                            <div class="circle-text">
+                                <small>المتبقي</small>
+                                <span id="cals-remaining" class="big-num">0</span>
+                                <small>cal</small>
+                            </div>
+                        </div>
+                        <div class="stats-stripe">
+                            <div class="stat-unit" style="width: 100%;"><span class="lbl">الهدف اليومي (صافي)</span><strong id="cals-target">0</strong></div>
+                        </div>
+                    </div>
+
+                    <div class="caffeine-card" onclick="showInfo('caffeine')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                            <span>☕ نافذة التركيز (Focus):</span>
+                            <span id="caffeine-focus-window" style="color:var(--success); font-weight:bold; font-size:0.9rem;">--</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #444; padding-top:5px;">
+                            <span>🚫 آخر موعد للكافيين:</span>
+                            <span id="caffeine-limit-time" style="color:var(--danger); font-weight:bold;">--:--</span>
+                        </div>
+                    </div>
+
+                    <div class="hero-card analysis-card">
+                        <div class="panel-head">
+                            <h3><i class="fas fa-chart-line"></i> تحليلك المستقبلي</h3>
+                            <i class="fas fa-info-circle info-icon" onclick="showInfo('analysisDynamic')"></i>
+                        </div>
+                        <div class="analysis-grid">
+                            <div class="ana-item">
+                                <span>وزنك المثالي</span>
+                                <strong id="ana-ideal-weight">--</strong>
+                            </div>
+                            <div class="ana-item">
+                                <span>نسبة الدهون المثالية</span> 
+                                <strong id="ana-bodyfat-ideal" style="color:var(--water)">--</strong>
+                            </div>
+                            <div class="ana-item" style="grid-column:span 2; border-top:1px solid #333; padding-top:10px; margin-top:5px;">
+                                <span>المدة المتوقعة للهدف</span>
+                                <strong id="ana-time" style="color:var(--primary)">--</strong>
+                            </div>
+                        </div>
+                        <div class="ana-footer">
+                            <p id="ana-advice">جاري الحساب...</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section-container">
+                        <h3>قائمة الفوز اليومي (Science Wins)</h3>
+                        <div class="habits-list">
+                            <div class="habit-item" id="habit-sun" onclick="toggleHabit('sun')">
+                                <div class="h-content">
+                                    <i id="icon-sun" class="far fa-circle"></i>
+                                    <span>شمس الصباح (15 دقيقة)</span>
+                                </div>
+                                <i class="fas fa-info-circle info-mini" onclick="showHabitInfo(event, 'sun')"></i>
+                            </div>
+
+                            <div class="habit-item" id="habit-veggies" onclick="toggleHabit('veggies')">
+                                <div class="h-content">
+                                    <i id="icon-veggies" class="far fa-circle"></i>
+                                    <span>أكل خضروات (ألياف ومعادن)</span>
+                                </div>
+                                <i class="fas fa-info-circle info-mini" onclick="showHabitInfo(event, 'veggies')"></i>
+                            </div>
+                            
+                            <div class="habit-item" id="habit-fruits" onclick="toggleHabit('fruits')">
+                                <div class="h-content">
+                                    <i id="icon-fruits" class="far fa-circle"></i>
+                                    <span>أكل فواكه (مضادات أكسدة)</span>
+                                </div>
+                                <i class="fas fa-info-circle info-mini" onclick="showHabitInfo(event, 'fruits')"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="vault-card" onclick="toast('رصيدك لليوم المفتوح')">
+                        <div class="vault-icon"><i class="fas fa-university"></i></div>
+                        <div class="vault-info">
+                            <span style="font-size:0.8rem; color:#aaa">الخزنة الأسبوعية <i class="fas fa-info-circle info-icon" onclick="showInfo('vault')"></i></span>
+                            <span id="weekly-bank-val" class="v-val">0 cal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dash-col-details">
+                    <div class="section-container">
+                        <h3>المغذيات اليومية</h3>
+                        <div class="macros-list">
+                            <div class="macro-row">
+                                <div class="m-head">
+                                    <span>بروتين</span> 
+                                    <span id="macro-p">0/0</span>
+                                </div>
+                                <div class="m-bar"><div class="m-fill p-fill"></div></div>
+                                <div id="protein-timer-box" style="display:flex; justify-content:space-between; align-items:center; margin-top:5px; background:rgba(59, 130, 246, 0.1); padding:5px 10px; border-radius:6px;">
+                                    <small style="color:#aaa;">الوجبة القادمة:</small>
+                                    <span id="next-protein-time" style="color:var(--primary); font-weight:bold; font-size:0.8rem;">--:--</span>
+                                    <small id="next-protein-amount" style="color:var(--text-main); font-size:0.8rem;">0g</small>
+                                </div>
+                            </div>
+                            <div class="macro-row">
+                                <div class="m-head"><span>كاربوهيدرات</span> <span id="macro-c">0/0</span></div>
+                                <div class="m-bar"><div class="m-fill c-fill"></div></div>
+                                <small id="water-retention-msg" style="color:var(--water); font-size:0.75rem; display:none;">⚠️ انتبه: الكارب العالي سيحبس ماء غداً</small>
+                            </div>
+                            <div class="macro-row">
+                                <div class="m-head"><span>دهون صحية</span> <span id="macro-f">0/0</span></div>
+                                <div class="m-bar"><div class="m-fill f-fill"></div></div>
+                            </div>
+                            <div class="macro-row">
+                                <div class="m-head"><span>ماء (هدف ديناميكي)</span> <span id="macro-water">0/0 L</span></div>
+                                <div class="m-bar"><div class="m-fill water-fill"></div></div>
+                            </div>
+                            
+                            <div class="macro-row">
+                                <div class="m-head">
+                                    <span>جودة النوم (Recovery)</span> 
+                                    <span id="sleep-score-val">0%</span>
+                                </div>
+                                <div class="m-bar" style="height:12px;"><div class="m-fill sleep-fill" style="background: var(--text-muted);"></div></div>
+                                <small id="sleep-debt-text" style="font-size:0.75rem; color:var(--danger); display:none; text-align:left; direction:ltr;">Sleep Debt: -0h</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="food-logger-card">
+                        <h3>تسجيل وجبة جديدة</h3>
+                        <div class="logger-grid">
+                            <div class="log-inp"><label>سعرات</label><input type="number" id="meal-cals" placeholder="0"></div>
+                            <div class="log-inp"><label>بروتين</label><input type="number" id="meal-protein" placeholder="0"></div>
+                            <div class="log-inp"><label>كارب</label><input type="number" id="meal-carbs" placeholder="0"></div>
+                            <div class="log-inp"><label>دهون</label><input type="number" id="meal-fats" placeholder="0"></div>
+                            <div class="log-inp"><label>ماء (L)</label><input type="number" id="meal-water" placeholder="0.2" step="0.1"></div>
+                        </div>
+                        <button onclick="addMeal()" class="btn-log-full">إضافة الوجبة <i class="fas fa-plus"></i></button>
+                    </div>
+
+                    <div class="actions-wrapper">
+                        <button onclick="toggleAct('steps-panel')" class="act-btn"><i class="fas fa-shoe-prints"></i> خطوات</button>
+                        <button onclick="toggleAct('cardio-panel')" class="act-btn"><i class="fas fa-running"></i> كارديو</button>
+                        <button onclick="toggleAct('weights-panel')" class="act-btn"><i class="fas fa-dumbbell"></i> حديد</button>
+                        <button onclick="toggleAct('sleep-panel')" class="act-btn"><i class="fas fa-bed"></i> نوم</button>
+                        <button onclick="openFoodSearch()" class="act-btn" style="grid-column: span 2;"><i class="fas fa-utensils"></i> أفكار وجبات</button>
+                        <button onclick="openSettings()" class="act-btn" style="grid-column: span 2;"><i class="fas fa-cog"></i> إعدادات</button>
+                    </div>
+
+                    <div id="steps-panel" class="logic-panel hidden">
+                        <div class="panel-head"><span>خطوات (NEAT)</span> <i class="fas fa-times" onclick="toggleAct('steps-panel')"></i></div>
+                        <input type="number" id="inp-steps" placeholder="عدد الخطوات" min="0" class="full-input">
+                        <button onclick="addSteps()" class="btn-go">تسجيل</button>
+                    </div>
+
+                    <div id="sleep-panel" class="logic-panel hidden">
+                        <div class="panel-head"><span>تسجيل النوم</span> <i class="fas fa-times" onclick="toggleAct('sleep-panel')"></i></div>
+                        <div style="background:#1a1a1a; padding:10px; border-radius:8px; margin-bottom:15px; border:1px dashed #444;">
+                            <label class="lbl-small" style="text-align:center;">💡 حاسبة دورات النوم (Sleep Cycles)</label>
+                            <div style="display:flex; gap:5px; margin-top:5px;">
+                                <input type="time" id="wake-time" class="full-input" style="margin:0;">
+                                <button onclick="calcSleepCycles()" style="width:40%; background:var(--accent); border:none; color:white; border-radius:8px; cursor:pointer;">متى أنام؟</button>
+                            </div>
+                            <p id="sleep-cycle-res" style="font-size:0.8rem; color:#ccc; margin-top:5px; text-align:center;"></p>
+                        </div>
+                        <label class="lbl-small">كم ساعة نمت البارحة؟</label>
+                        <input type="number" id="inp-sleep" placeholder="مثلاً 7.5" step="0.5" class="full-input">
+                        <button onclick="addSleep()" class="btn-go" style="background: var(--accent); color: white;">تسجيل النوم</button>
+                    </div>
+
+                    <div id="cardio-panel" class="logic-panel hidden">
+                        <div class="panel-head">
+                            <span>تمرين كارديو</span> 
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <i class="fas fa-info-circle info-icon" onclick="showInfo('cardio')"></i>
+                                <i class="fas fa-times" onclick="toggleAct('cardio-panel')"></i>
+                            </div>
+                        </div>
+                        <label class="lbl-small">نوع النشاط</label>
+                        <select id="cardio-type" class="full-input" onchange="toggleCardioInputs()">
+                            <option value="treadmill">جهاز المشي (Treadmill)</option>
+                            <option value="run">ركض خارجي (Running)</option>
+                            <option value="swim">سباحة (Swimming)</option>
+                            <option value="bike">الدراجة (Stationary Bike)</option>
+                            <option value="stairs">الدرج (StairMaster)</option>
+                        </select>
+                        <div id="inputs-treadmill">
+                            <div class="row-inputs">
+                                <div><label class="lbl-small">السرعة (km/h)</label><input type="number" id="tm-speed" placeholder="max 25" step="0.1"></div>
+                                <div><label class="lbl-small">الانحناء (Incline)</label><input type="number" id="tm-incline" placeholder="max 20" step="0.5"></div>
+                            </div>
+                        </div>
+                        <label class="lbl-small">المدة (دقيقة)</label>
+                        <input type="number" id="cardio-duration" placeholder="المدة بالدقائق" class="full-input">
+                        <button onclick="addCardio()" class="btn-go">حساب وتسجيل</button>
+                    </div>
+
+                    <div id="weights-panel" class="logic-panel hidden">
+                        <div class="panel-head">
+                            <span>تمرين حديد</span> 
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <i class="fas fa-info-circle info-icon" onclick="showInfo('weights')"></i>
+                                <i class="fas fa-times" onclick="toggleAct('weights-panel')"></i>
+                            </div>
+                        </div>
+                        <label class="lbl-small">شدة التمرين</label>
+                        <select id="wt-intensity" class="full-input">
+                            <option value="light">خفيف</option>
+                            <option value="moderate">متوسط</option>
+                            <option value="failure_rest">للفشل العضلي (مع راحة)</option>
+                            <option value="failure_norest">للفشل العضلي (بدون راحة)</option>
+                        </select>
+                        <label class="lbl-small">مدة التمرين (دقيقة)</label>
+                        <input type="number" id="wt-min" placeholder="الوقت الفعلي للتمرين" class="full-input" max="120">
+                        <button onclick="addWeights()" class="btn-go">حساب وتسجيل</button>
+                    </div>
+
+                </div>
+            </div>
+
+             <div style="display:none"><h3 id="dash-name"></h3></div>
+        </section>
+
+        <section id="screen-settings" class="screen">
+            <div class="center-content">
+                 <div class="setup-container">
+                    <div class="panel-head">
+                        <h2>الإعدادات</h2>
+                        <i class="fas fa-times close-btn-large" onclick="navTo('screen-dashboard')"></i>
+                    </div>
+                    <form id="form-edit">
+                        <div class="input-box"><label>تعديل الوزن (كغ)</label><input type="number" id="edit-weight" min="30"></div>
+                        <div class="input-box"><label>تعديل الطول (سم)</label><input type="number" id="edit-height" min="50"></div>
+                        <div class="input-box">
+                            <label>الهدف <i class="fas fa-info-circle info-icon" onclick="showInfo('goal')"></i></label>
+                            <select id="edit-goal"><option value="-500">تنشيف</option><option value="0">ثبات</option><option value="300">تضخيم</option></select>
+                        </div>
+                        <button type="submit" class="btn-main">حفظ التغييرات</button>
+                        <p onclick="resetAppData()" style="color:var(--danger); margin-top:20px; cursor:pointer;">مسح جميع البيانات</p>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </div>
+    <div id="tour-overlay" class="tour-backdrop hidden">
+        <div class="tour-card">
+            <div class="tour-header">
+                <h3 id="tour-title">عنوان الجولة</h3>
+                <span id="tour-step-count">1/5</span>
+            </div>
+            <p id="tour-desc">وصف الميزة هنا...</p>
+            <div class="tour-actions">
+                <button onclick="TourManager.skip()" class="btn-text">تخطي</button>
+                <button onclick="TourManager.next()" class="btn-next">التالي <i class="fas fa-arrow-left"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
