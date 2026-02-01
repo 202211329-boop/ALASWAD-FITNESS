@@ -237,46 +237,87 @@ select.full-input { color:white; background:var(--bg-input); border:1px solid #3
 .hidden { display: none !important; }
 .alert-banner { background: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 10px; text-align: center; border-bottom: 1px solid var(--danger); width: 100%; margin-bottom: 20px; border-radius: 8px; display: flex; justify-content: center; align-items: center; gap: 10px;}
 .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #222; border: 1px solid var(--primary); color: white; padding: 12px 25px; border-radius: 30px; z-index: 200; font-size: 0.9rem; width: max-content; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
-/* --- Tour System Styles --- */
+/* --- Tour System Styles (المحدث) --- */
+/* كلاس لمنع السكرول في الصفحة الخلفية */
+body.stop-scrolling {
+    overflow: hidden !important;
+    height: 100vh;
+}
+
 .tour-backdrop {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85); z-index: 2000;
-    display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9990;
     transition: opacity 0.3s ease;
 }
 
-/* العنصر الذي عليه الدور في الشرح */
-.tour-highlight {
-    position: relative;
-    z-index: 2001 !important;
-    background: var(--bg-card) !important;
-    box-shadow: 0 0 0 4px var(--primary), 0 0 50px rgba(59, 130, 246, 0.5) !important;
-    transition: box-shadow 0.3s ease;
-    pointer-events: none; /* لمنع النقر أثناء الشرح */
-}
-
 .tour-card {
-    background: #1f1f1f;
-    border: 1px solid var(--primary);
-    border-radius: 15px;
+    position: fixed; 
+    background: #18181b;
+    border: 1px solid #333; /* حدود غامقة */
+    border-right: 4px solid var(--primary);
+    border-radius: 12px;
     padding: 20px;
-    width: 100%; max-width: 500px;
-    margin: 0 auto 30px auto; /* مسافة من الأسفل */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    z-index: 2002;
-    animation: slideUp 0.4s ease-out;
+    box-shadow: 0 0 50px rgba(0,0,0,1);
+    z-index: 9995;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* أبعاد افتراضية */
+    width: 90%; 
+    max-width: 400px;
 }
 
-@keyframes slideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+/* --- وضعيات الظهور الأربعة --- */
+/* 1. أسفل */
+.tour-card.pos-bottom {
+    top: auto; bottom: 30px; left: 50%; transform: translateX(-50%);
+}
+/* 2. أعلى */
+.tour-card.pos-top {
+    top: 30px; bottom: auto; left: 50%; transform: translateX(-50%);
+}
+/* 3. يمين (للشاشات العريضة أو العناصر اليسارية) */
+.tour-card.pos-right {
+    top: 50%; right: 20px; left: auto; bottom: auto;
+    transform: translateY(-50%);
+    width: 250px; /* عرض أصغر للجانب */
+}
+/* 4. يسار (للشاشات العريضة أو العناصر اليمينية) */
+.tour-card.pos-left {
+    top: 50%; left: 20px; right: auto; bottom: auto;
+    transform: translateY(-50%);
+    width: 250px;
 }
 
+/* العنصر المحدد */
+.tour-highlight {
+    position: relative !important;
+    z-index: 9991 !important;
+    background: var(--bg-card);
+    box-shadow: 0 0 0 4px var(--primary), 0 0 100vh rgba(0,0,0,0.85) !important;
+    border-radius: 10px;
+    pointer-events: none; 
+}
+.tour-highlight-circle { border-radius: 50% !important; }
+
+/* النصوص والأزرار السوداء */
 .tour-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
 .tour-header h3 { margin: 0; color: var(--primary); font-size: 1.1rem; }
-#tour-step-count { color: #666; font-size: 0.8rem; }
-#tour-desc { color: #ddd; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
+#tour-desc { color: #ddd; line-height: 1.6; margin-bottom: 20px; }
 
 .tour-actions { display: flex; justify-content: space-between; align-items: center; }
-.btn-next { background: var(--primary); color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-.btn-text { background: transparent; color: #888; border: none; cursor: pointer; text-decoration: underline; }
+
+/* زر التالي أسود */
+.btn-next { 
+    background: #000000; /* أسود */
+    color: white; 
+    border: 1px solid #333; 
+    padding: 8px 25px; 
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+.btn-next:active { transform: scale(0.95); }
+
+.btn-text { background: transparent; color: #777; border: none; cursor: pointer; text-decoration: underline; }

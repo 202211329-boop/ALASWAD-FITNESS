@@ -33,46 +33,142 @@ const infoData = {
     }
 };
 
-// --- تعريف خطوات الجولة ---
+// --- إعدادات الجولة الشاملة ---
+// --- خطوات الجولة (الشاملة لكل تفاصيل التطبيق) ---
 const tourSteps = [
-    { target: 'battery-container', title: "🧠 بطارية الجسم", desc: "مؤشر طاقتك الحقيقية! ينقص بقلة النوم وقلة الماء، ويزيد بالراحة. لا تتمرن بقوة إذا كان أحمر!" },
-    { target: 'caffeine-card', title: "☕ ضبط الكافيين", desc: "لأقصى تركيز: اشرب قهوتك بعد الاستيقاظ بـ 90 دقيقة. وتوقف قبل موعد النوم بـ 10 ساعات." },
-    { target: 'macro-water', title: "💧 الماء الذكي", desc: "هدفك ليس ثابتاً! سيزيد النظام هدفك تلقائياً عند تسجيل التمارين لتعويض العرق." },
-    { target: 'habit-sun', title: "☀️ عادات الفوز", desc: "عادات صغيرة بتأثير هرموني ضخم. ابدأ يومك بضوء الشمس لضبط نومك ليلاً." },
-    { target: 'sleep-panel', title: "📉 ديون النوم", desc: "النظام يحسب الديون المتراكمة عليك. إذا تراكم الدين، سيطلب منك النظام تقليل الجهد لتجنب الإصابة." }
+    {
+        selector: '.hero-card', 
+        title: "🔥 محرك حرق الدهون",
+        desc: "العداد الرئيسي! يظهر لك السعرات المتبقية لليوم. كلما أكلت، تغلق الدائرة. هدفك هو عدم تجاوز الرقم."
+    },
+    {
+        selector: '.battery-container',
+        title: "🧠 بطارية الجسم",
+        desc: "مؤشر حيوي لطاقتك! ينخفض مع السهر والتوتر، ويشحن بالنوم الجيد. تمرن بذكاء حسب شحن بطاريتك."
+    },
+    {
+        selector: '.analysis-card',
+        title: "🔮 التنبؤ بالمستقبل",
+        desc: "نحسب لك هنا متى ستصل لوزنك المثالي بناءً على التزامك الحالي. الأرقام هنا تتحدث عن نتيجتك القادمة."
+    },
+    {
+        selector: '.habits-list', // جديد: المهام اليومية
+        title: "✅ انتصارات صغيرة (Science Wins)",
+        desc: "قائمة مهام علمية بسيطة (شمس، خضار، فواكه). إنجازها يومياً يرفع معدل الحرق ويحسّن المزاج."
+    },
+    {
+        selector: '.vault-card', // جديد: الخزنة
+        title: "🏦 مخزن السعرات (الخزنة)",
+        desc: "وفرت سعرات اليوم؟ لا تضيع! تنتقل تلقائياً لهذه الخزنة لتستخدمها في الوجبة المفتوحة (Cheat Meal) نهاية الأسبوع."
+    },
+    {
+        selector: '.macros-list', // جديد: المغذيات والبروتين
+        title: "🥩 الماكروز والبروتين",
+        desc: "تفاصيل وقود جسمك. الشريط الأزرق هو **البروتين** (الأهم للعضلات)، يليه الكارب والدهون. حاول إكمال شريط البروتين يومياً."
+    },
+    {
+        selector: '.food-logger-card', // جديد: تسجيل الأكل
+        title: "🍽️ تسجيل الوجبات",
+        desc: "مكان إدخال بيانات أكلك. اكتب السعرات والبروتين هنا واضغط 'إضافة' ليتم خصمها من رصيدك اليومي."
+    },
+    {
+        selector: '.actions-wrapper',
+        title: "🎮 أزرار التحكم",
+        desc: "من هنا تسجل نشاطاتك: خطواتك، تمارينك (كارديو أو حديد)، وتعديل إعدادات جسمك."
+    },
+    {
+        selector: '#sleep-panel', // النوم (كما طلبت سابقاً)
+        title: "🛌 بنك النوم",
+        desc: "سجل ساعات نومك بدقة. النظام يحسب 'ديون النوم' وينبهك لتقليل الجهد إذا كنت مرهقاً.",
+        onShow: () => { 
+            const el = document.getElementById('sleep-panel');
+            if(el) el.classList.remove('hidden'); 
+        },
+        onHide: () => { 
+            const el = document.getElementById('sleep-panel');
+            if(el) el.classList.add('hidden'); 
+        }
+    },
+    {
+        selector: '.caffeine-card', // الكافيين (آخر خطوة كما طلبت)
+        title: "☕ الكافيين الذكي",
+        desc: "يعطيك أفضل وقت لشرب القهوة (للتركيز) ومتى تتوقف (للنوم).<br><b>ملاحظة:</b> المواعيد تتعدل تلقائياً حسب وقت استيقاظك!",
+        onShow: () => {
+             const el = document.querySelector('.caffeine-card');
+             if(el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
 ];
 
-// --- مدير الجولة (Tour Manager) ---
+// --- مدير الجولة (نفس الكود السابق الشغال 100%) ---
 const TourManager = {
     step: 0,
     active: false,
+
     start: function() {
-        // تأكد من وجود العنصر في الـ HTML
-        if(!document.getElementById('tour-overlay')) {
-            console.error("خطأ: عنصر tour-overlay غير موجود في HTML");
-            return;
-        }
+        if(!document.getElementById('tour-overlay')) return;
         this.step = 0;
         this.active = true;
-        $('tour-overlay').classList.remove('hidden');
+        
+        // قفل السكرول
+        document.body.classList.add('stop-scrolling');
+        
+        document.getElementById('tour-overlay').classList.remove('hidden');
+        document.querySelectorAll('.logic-panel').forEach(p => p.classList.add('hidden'));
         this.render();
     },
+
     render: function() {
+        // تنظيف الهايلايت
         document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+
         const current = tourSteps[this.step];
-        const el = document.getElementById(current.target);
-        
-        // إذا العنصر موجود، نضيئه
-        if(el) {
-            el.classList.add('tour-highlight');
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        $('tour-title').innerText = current.title;
-        $('tour-desc').innerHTML = current.desc;
-        $('tour-step-count').innerText = `${this.step + 1} / ${tourSteps.length}`;
+        if (current.onShow) current.onShow();
+
+        setTimeout(() => {
+            let el;
+            if (current.selector) el = document.querySelector(current.selector);
+            else if (current.target) el = document.getElementById(current.target);
+
+            if (el) {
+                el.classList.add('tour-highlight');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // --- منطق تحديد المكان الذكي ---
+                const rect = el.getBoundingClientRect();
+                const card = document.querySelector('.tour-card');
+                
+                card.classList.remove('pos-top', 'pos-bottom', 'pos-left', 'pos-right');
+
+                const spaceTop = rect.top;
+                const spaceBottom = window.innerHeight - rect.bottom;
+                const spaceLeft = rect.left;
+                const spaceRight = window.innerWidth - rect.right;
+
+                let bestPos = 'bottom';
+                let maxSpace = spaceBottom;
+
+                if (spaceTop > maxSpace) { maxSpace = spaceTop; bestPos = 'top'; }
+                
+                if (window.innerWidth > 600) { 
+                    if (spaceRight > 260 && spaceRight > maxSpace) { bestPos = 'right'; }
+                    if (spaceLeft > 260 && spaceLeft > maxSpace) { bestPos = 'left'; }
+                }
+
+                card.classList.add('pos-' + bestPos);
+            }
+
+            // تحديث النصوص
+            document.getElementById('tour-title').innerText = current.title;
+            document.getElementById('tour-desc').innerHTML = current.desc;
+            document.getElementById('tour-step-count').innerText = `${this.step + 1} / ${tourSteps.length}`;
+        }, 350);
     },
+
     next: function() {
+        const current = tourSteps[this.step];
+        if (current.onHide) current.onHide();
+
         if (this.step < tourSteps.length - 1) {
             this.step++;
             this.render();
@@ -80,14 +176,26 @@ const TourManager = {
             this.end();
         }
     },
-    skip: function() { this.end(); },
+
+    skip: function() {
+        const current = tourSteps[this.step];
+        if (current && current.onHide) current.onHide();
+        this.end();
+    },
+
     end: function() {
         this.active = false;
-        $('tour-overlay').classList.add('hidden');
+        // إرجاع السكرول
+        document.body.classList.remove('stop-scrolling');
+        
+        document.getElementById('tour-overlay').classList.add('hidden');
         document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
-        // حفظ أن المستخدم شاهد الجولة
-        state.profile.tourSeen = true;
-        saveState();
+        
+        if(state && state.profile) {
+            state.profile.tourSeen = true;
+            saveState();
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 };
 
